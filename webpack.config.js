@@ -14,13 +14,13 @@ const optimization = () => {
     splitChunks: {
       chunks: 'all'
     }
-  }
+  };
 
   if (isProd) {
     config.minimizer = [
       new OptimizeCssAssetsWebpackPlugin(),
       new TerserWebpackPlugin()
-    ]
+    ];
   }
 
   return config;
@@ -40,6 +40,26 @@ const cssLoaders = extra => {
 
   if (extra) {
     loaders.push(extra);
+  }
+
+  return loaders;
+};
+
+const jsLoaders = () => {
+  const loaders = [{
+    loader: 'babel-loader',
+    options: {
+      presets: [
+        '@babel/preset-env'
+      ],
+      plugins: [
+        '@babel/plugin-proposal-class-properties'
+      ]
+    }
+  }];
+
+  if (isDev) {
+    loaders.push('eslint-loader');
   }
 
   return loaders;
@@ -70,6 +90,7 @@ module.exports = {
     port: 4200,
     hot: isDev
   },
+  devtool: isDev ? 'source-map' : '',
   plugins: [
     new HTMLWebpackPlugin({
       template: './index.html',
@@ -121,23 +142,8 @@ module.exports = {
       { 
         test: /\.js$/, 
         exclude: /node_modules/, 
-        loader: {
-          loader: 'babel-loader',
-          options: {
-            presets: [
-              ['@babel/preset-env', {
-                targets: {
-                  browsers: '> 3%'
-                }
-              }]
-            ],
-            plugins: [
-              '@babel/plugin-proposal-class-properties',
-              '@babel/plugin-syntax-dynamic-import'
-            ]
-          }
-        }
+        use: jsLoaders()
       }
     ]
   }
-}
+};
